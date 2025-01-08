@@ -2,6 +2,7 @@ package com.quizserver.service.test;
 
 import com.quizserver.dto.QuestionDTO;
 import com.quizserver.dto.TestDTO;
+import com.quizserver.dto.TestDetailsDTO;
 import com.quizserver.entities.Question;
 import com.quizserver.entities.Test;
 import com.quizserver.repository.QuestionReponsitory;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.PrimitiveIterator;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,5 +51,18 @@ public class TestServiceImpl implements TestService {
         return testRepository.findAll().stream().peek(
                 test -> test.setTime(test.getQuestions().size()*test.getTime())).collect(Collectors.toList())
                 .stream().map(Test::getDto).collect(Collectors.toList());
+    }
+
+    public TestDetailsDTO getAllQuestionsByTest(long id){
+        Optional<Test> optionalTest = testRepository.findById(id);
+        TestDetailsDTO testDetailsDTO = new TestDetailsDTO();
+        if(optionalTest.isPresent()){
+            TestDTO testDTO = optionalTest.get().getDto();
+            testDTO.setTime(optionalTest.get().getTime() * optionalTest.get().getQuestions().size());
+            testDetailsDTO.setTestDTO(testDTO);
+            testDetailsDTO.setQuestions(optionalTest.get().getQuestions().stream().map(Question::getDto).toList());
+            return testDetailsDTO;
+        }
+        return testDetailsDTO;
     }
 }
